@@ -10,7 +10,7 @@ import pandas as pd
 
 # Configuration
 CSV_PATH = Path("CPro M10 (L) 3PB 7.5d50N75v2000c4w.7a2.Loop 1.tracking.csv")
-cycle = 1000
+cycle_a = 1000
 GRID_POINTS = 1000
 CURVE_COLOR = "#000000"
 FIGURE_SIZE = (7.0, 4.5)
@@ -36,13 +36,13 @@ def load_data(csv_path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         position = []
 
         for row in reader:
-            if row[cycle_column] == str(cycle):
+            if row[cycle_column] == str(cycle_a):
                 if row[cycle_column] != '':
                     cycle.append(float(row[cycle_column]))
                 if row[force_column] != '':
-                    force.append(float(row[force_column]))
+                    force.append(abs(float(row[force_column])))
                 if row[position_column] != '':
-                    position.append(float(row[position_column]))
+                    position.append(abs(float(row[position_column])))
 
         cycle = np.array(cycle)
         force = np.array(force)
@@ -50,32 +50,20 @@ def load_data(csv_path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     return cycle, force, position
 
-def plot_curve(position: np.ndarray, force: np.ndarray) -> None:
+def plot_curve(position: np.ndarray, force: np.ndarray):
     """Create the publication-style force-displacement plot."""
     figure, axis = plt.subplots(figsize=FIGURE_SIZE)
-    figure.patch.set_facecolor("white")
-    axis.set_facecolor("white")
-    axis.plot(position, force, color=CURVE_COLOR, linewidth=2.0)
+    axis.plot(position, force, color=CURVE_COLOR, linewidth=1.0)
     axis.set_xlabel("Absolute Digital Position (mm)")
     axis.set_ylabel("Absolute Force (N)")
-    # axis.set_xlim(-0.5, position.max()+0.5)
-    axis.set_ylim(bottom=0)
-    axis.grid(True, color="#D9D9D9", linewidth=0.2, alpha=1.0)
-    axis.set_axisbelow(True)
-    axis.spines["top"].set_visible(False)
-    axis.spines["right"].set_visible(False)
-    figure.tight_layout()
-
-    if OUTPUT_PATH is not None:
-        figure.savefig(OUTPUT_PATH, dpi=300, bbox_inches="tight")
     plt.show()
 
 
 def main() -> None:
     cycle, force, position = load_data(CSV_PATH)
     plot_curve(position, force)
-    print(len(position))
-    print(len(force))
+    print(position)
+    print(force)
 
 
 if __name__ == "__main__":
